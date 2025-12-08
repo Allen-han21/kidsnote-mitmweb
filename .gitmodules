@@ -1,0 +1,3 @@
+[submodule "mitmproxy"]
+	path = mitmproxy
+	url = https://github.com/Allen-han21/mitmproxy.git
