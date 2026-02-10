@@ -1,0 +1,33 @@
+name: "Kidsnote Ads"
+description: "Kidsnote ad tracking (request/impression/click)"
+
+matchers:
+  - id: "ad_request"
+    label: "Ad Request"
+    color: "#8b5cf6"
+    host: "ads-api-kcsandbox-01.kidsnote.com"
+    path_pattern: "/req(\\?|$)"
+  - id: "ad_impression"
+    label: "Impression"
+    color: "#3b82f6"
+    host: "ads-api-kcsandbox-01.kidsnote.com"
+    path_pattern: "/imp(\\?|$)"
+  - id: "ad_click"
+    label: "Click"
+    color: "#10b981"
+    host: "ads-api-kcsandbox-01.kidsnote.com"
+    path_pattern: "/click(\\?|$)"
+
+extractors:
+  - source: "request.query"
+    field: "adsid"
+    display_name: "Ad ID"
+    primary_key: true
+
+display:
+  type: "event_table"
+  columns:
+    - { field: "Ad ID", label: "Ad ID", type: "code" }
+    - { field: "matcher_label", label: "Event", type: "badge" }
+    - { field: "timestamp", label: "Time", type: "timestamp" }
+    - { field: "status_code", label: "Status", type: "status_code" }

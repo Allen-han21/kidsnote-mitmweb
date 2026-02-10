@@ -1,0 +1,20 @@
+name: "Tiara Analytics"
+description: "Kakao Tiara analytics event tracking"
+
+matchers:
+  - id: "tiara_track"
+    label: "Tiara Event"
+    color: "#f59e0b"
+    host: "stat.tiara.daum.net"
+    path_pattern: ".*"
+
+extractors: []
+
+display:
+  type: "event_table"
+  columns:
+    - { field: "matcher_label", label: "Event", type: "badge" }
+    - { field: "timestamp", label: "Time", type: "timestamp" }
+    - { field: "method", label: "Method", type: "text" }
+    - { field: "path", label: "Path", type: "text" }
+    - { field: "status_code", label: "Status", type: "status_code" }

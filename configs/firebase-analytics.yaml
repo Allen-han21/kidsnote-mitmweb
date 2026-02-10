@@ -1,0 +1,28 @@
+name: "Firebase Analytics"
+description: "Google Firebase Analytics event tracking"
+
+matchers:
+  - id: "firebase_batch"
+    label: "Batch Upload"
+    color: "#ea4335"
+    host: "app-measurement.com"
+    path_pattern: "/a"
+  - id: "firebase_config"
+    label: "Remote Config"
+    color: "#4285f4"
+    host: "firebaseremoteconfig.googleapis.com"
+    path_pattern: "/v1/projects/"
+
+extractors:
+  - source: "request.header"
+    field: "x-firebase-client"
+    display_name: "Firebase Client"
+
+display:
+  type: "event_table"
+  columns:
+    - { field: "matcher_label", label: "Event", type: "badge" }
+    - { field: "timestamp", label: "Time", type: "timestamp" }
+    - { field: "method", label: "Method", type: "text" }
+    - { field: "path", label: "Path", type: "text" }
+    - { field: "status_code", label: "Status", type: "status_code" }

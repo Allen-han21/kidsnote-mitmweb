@@ -1,0 +1,28 @@
+name: "Amplitude"
+description: "Amplitude analytics event tracking"
+
+matchers:
+  - id: "amplitude_batch"
+    label: "Batch"
+    color: "#1c1c76"
+    host: "api2.amplitude.com"
+    path_pattern: "/2/httpapi"
+  - id: "amplitude_identify"
+    label: "Identify"
+    color: "#5c5cf0"
+    host: "api2.amplitude.com"
+    path_pattern: "/identify"
+
+extractors:
+  - source: "request.header"
+    field: "content-type"
+    display_name: "Content-Type"
+
+display:
+  type: "event_table"
+  columns:
+    - { field: "matcher_label", label: "Event", type: "badge" }
+    - { field: "timestamp", label: "Time", type: "timestamp" }
+    - { field: "method", label: "Method", type: "text" }
+    - { field: "Content-Type", label: "Content-Type", type: "text" }
+    - { field: "status_code", label: "Status", type: "status_code" }
