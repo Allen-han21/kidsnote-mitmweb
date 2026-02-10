@@ -1,0 +1,46 @@
+[project]
+name = "mitmios"
+version = "0.1.0"
+description = "iOS network debugging tool with configurable analytics tracking, built on mitmproxy"
+readme = "README.md"
+requires-python = ">=3.12"
+license = {text = "MIT"}
+authors = [{name = "Allen Han"}]
+keywords = ["ios", "mitmproxy", "network", "debugging", "proxy", "analytics"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Framework :: AsyncIO",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: Proxy Servers",
+    "Topic :: Software Development :: Debuggers",
+]
+dependencies = [
+    "typer>=0.15.0",
+    "pyyaml>=6.0",
+    "rich>=13.0",
+]
+
+[project.optional-dependencies]
+proxy = ["mitmproxy>=12.0"]
+
+[project.scripts]
+mitmios = "mitmios.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/Allen-han21/mitmios"
+Repository = "https://github.com/Allen-han21/mitmios"
+Issues = "https://github.com/Allen-han21/mitmios/issues"
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["mitmios*"]
+
+[tool.setuptools.package-data]
+mitmios = ["configs/*.yaml"]
