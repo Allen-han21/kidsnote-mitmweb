@@ -23,7 +23,47 @@ mitmios setup
 mitmios start
 ```
 
-Open the web UI at `http://127.0.0.1:8081` and switch to the **Trackers** tab.
+Open the web UI at the URL printed in the terminal (includes authentication token).
+
+---
+
+## Connecting Devices
+
+### iOS Simulator
+
+```bash
+# Set proxy environment variables on the booted simulator
+xcrun simctl spawn booted launchctl setenv http_proxy http://127.0.0.1:8080
+xcrun simctl spawn booted launchctl setenv https_proxy http://127.0.0.1:8080
+```
+
+Then relaunch the app in the simulator — traffic will be captured.
+
+### Physical Device (WireGuard — recommended)
+
+1. In the mitmios web UI, go to **Capture** tab
+2. Check **Run WireGuard Server**
+3. Scan the QR code with the [WireGuard app](https://apps.apple.com/app/wireguard/id1441195209) on your device
+4. Name the tunnel (e.g. `mitmios`) and enable it
+
+### Physical Device (Manual Proxy)
+
+1. Connect device to the same Wi-Fi network as your Mac
+2. On iPhone: **Settings → Wi-Fi → (i) → Configure Proxy → Manual**
+   - Server: your Mac's local IP (e.g. `192.168.x.x`)
+   - Port: `8080`
+3. Start mitmios listening on all interfaces:
+   ```bash
+   mitmios start --host 0.0.0.0
+   ```
+
+### Certificate Setup (required for HTTPS)
+
+```bash
+mitmios setup
+```
+
+Or manually: open Safari on the device/simulator → navigate to `http://mitm.it` → install profile → **Settings → General → About → Certificate Trust Settings** → enable mitmproxy.
 
 ---
 
@@ -31,7 +71,7 @@ Open the web UI at `http://127.0.0.1:8081` and switch to the **Trackers** tab.
 
 ```
 iOS Simulator / Device
-    | (HTTP/HTTPS via proxy :8080)
+    | (HTTP/HTTPS via proxy :8080 or WireGuard)
     v
 mitmproxy core (traffic interception)
     |
@@ -40,7 +80,9 @@ mitmweb backend (Tornado + WebSocket)
     |
     v
 React dashboard (custom UI)
-    ├── Flow List     — standard mitmproxy flow table
+    ├── Capture       — configure proxy modes (HTTP, WireGuard, Reverse, etc.)
+    ├── Flow List     — request/response inspector with search & filter
+    ├── Options       — strip cache headers, display settings
     ├── Metrics       — response time, status codes, domain stats
     └── Trackers      — config-driven event tracking (YAML plugins)
 ```
@@ -233,11 +275,20 @@ These fields are always available without extractors:
 ```bash
 git clone --recursive https://github.com/Allen-han21/mitmios.git
 cd mitmios
-uv sync
+uv venv && source .venv/bin/activate
+uv pip install -e .
+
+# Install mitmproxy from the forked submodule (required for custom web UI)
+uv pip install -e ./mitmproxy
+
+# Build the frontend (YAML configs → TypeScript → Vite bundle)
+./scripts/build-frontend.sh
 
 # Start dev servers (frontend + backend)
 ./scripts/dev.sh
 ```
+
+> **Important:** You must install mitmproxy from the submodule (`./mitmproxy`), not from PyPI. The submodule contains the custom React dashboard with Trackers and Metrics tabs.
 
 ### Build Frontend
 
@@ -282,7 +333,7 @@ mitmios/
 
 | Layer | Technology |
 |-------|-----------|
-| Proxy | mitmproxy 12+ |
+| Proxy | mitmproxy (forked, 13.x-dev) |
 | CLI | Python 3.12+ / typer / rich |
 | Config | YAML / PyYAML |
 | Frontend | React 19 / TypeScript 5 / Redux / Vite |
