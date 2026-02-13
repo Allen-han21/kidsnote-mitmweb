@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   build-and-publish:
@@ -66,8 +67,6 @@ jobs:
       # Step 4: Publish to PyPI
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
 
       # Step 5: Create GitHub Release
       - name: Extract version from tag
@@ -94,53 +93,3 @@ jobs:
           prerelease: ${{ contains(steps.version.outputs.version, 'rc') || contains(steps.version.outputs.version, 'beta') || contains(steps.version.outputs.version, 'alpha') }}
           files: |
             dist/*
-
-  update-homebrew:
-    name: Update Homebrew Formula
-    needs: build-and-publish
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Extract version from tag
-        id: version
-        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-
-      - name: Wait for PyPI availability
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          echo "Waiting for mitmios ${VERSION} on PyPI..."
-          for i in $(seq 1 30); do
-            if curl -sf "https://pypi.org/pypi/mitmios/${VERSION}/json" > /dev/null 2>&1; then
-              echo "Available on PyPI"
-              break
-            fi
-            echo "  Attempt $i/30 - not yet available, waiting 10s..."
-            sleep 10
-          done
-
-      - name: Get SHA256 from PyPI
-        id: sha
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          SHA=$(python3 -c "
-          import json, urllib.request
-          data = json.loads(urllib.request.urlopen(f'https://pypi.org/pypi/mitmios/${VERSION}/json').read())
-          for f in data['urls']:
-              if f['packagetype'] == 'sdist':
-                  print(f['digests']['sha256'])
-                  break
-          " 2>/dev/null || echo "PLACEHOLDER")
-          echo "sha256=$SHA" >> $GITHUB_OUTPUT
-
-      - name: Update formula and push to tap
-        uses: dmnemec/copy_file_to_another_repo_action@main
-        env:
-          API_TOKEN_GITHUB: ${{ secrets.TAP_GITHUB_TOKEN }}
-        with:
-          source_file: "homebrew/mitmios.rb"
-          destination_repo: "Allen-han21/homebrew-mitmios"
-          destination_folder: "Formula"
-          user_email: "github-actions[bot]@users.noreply.github.com"
-          user_name: "github-actions[bot]"
-          commit_message: "Update mitmios to v${{ steps.version.outputs.version }}"
