@@ -31,13 +31,31 @@ Open the web UI at the URL printed in the terminal (includes authentication toke
 
 ### iOS Simulator
 
+**Step 1.** Install CA certificate to the simulator (once per simulator):
+
 ```bash
-# Set proxy environment variables on the booted simulator
-xcrun simctl spawn booted launchctl setenv http_proxy http://127.0.0.1:8080
-xcrun simctl spawn booted launchctl setenv https_proxy http://127.0.0.1:8080
+xcrun simctl keychain booted add-root-cert ~/.mitmproxy/mitmproxy-ca-cert.pem
 ```
 
-Then relaunch the app in the simulator — traffic will be captured.
+**Step 2.** Enable macOS system proxy (iOS Simulator shares the Mac's network stack):
+
+```bash
+networksetup -setwebproxy "Wi-Fi" 127.0.0.1 8080
+networksetup -setsecurewebproxy "Wi-Fi" 127.0.0.1 8080
+```
+
+**Step 3.** Run your app in the simulator — traffic will be captured.
+
+**Step 4.** When done, disable the system proxy:
+
+```bash
+networksetup -setwebproxystate "Wi-Fi" off
+networksetup -setsecurewebproxystate "Wi-Fi" off
+```
+
+> **Tip:** The proxy setting is cached per-process. You can disable the system proxy right after launching your app — capture will continue for that app session. This minimizes the time your entire Mac routes through the proxy.
+
+> **Note:** `launchctl setenv http_proxy` does NOT work for URLSession-based apps. iOS Simulator's URLSession reads proxy settings from macOS System Preferences (`SCDynamicStore`), not from environment variables.
 
 ### Physical Device (WireGuard — recommended)
 
