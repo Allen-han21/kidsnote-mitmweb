@@ -102,7 +102,8 @@ React dashboard (custom UI)
     ├── Flow List     — request/response inspector with search & filter
     ├── Options       — strip cache headers, display settings
     ├── Metrics       — response time, status codes, domain stats
-    └── Trackers      — config-driven event tracking (YAML plugins)
+    ├── Trackers      — config-driven event tracking (YAML plugins)
+    └── Theme         — light / dark / system mode toggle
 ```
 
 ### Tracker Plugin System
@@ -344,6 +345,16 @@ mitmios/
 │           └── MetricsPanel/         # Network metrics dashboard
 └── pyproject.toml
 ```
+
+---
+
+## Dark Mode
+
+The web dashboard supports **light**, **dark**, and **system** (auto-detect) themes.
+
+- Click the theme toggle icon in the header to cycle through modes: **System → Light → Dark**
+- **System** mode follows your OS appearance setting (`prefers-color-scheme`)
+- Your preference is saved in `localStorage` and persists across sessions
 
 ---
 
