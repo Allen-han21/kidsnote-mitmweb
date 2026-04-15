@@ -37,6 +37,7 @@ def start(
     host: str = typer.Option("127.0.0.1", "--host", help="Web UI host"),
     no_browser: bool = typer.Option(False, "--no-browser", help="Don't open browser"),
     no_simulator: bool = typer.Option(False, "--no-simulator", help="Skip simulator proxy info"),
+    safari: bool = typer.Option(False, "--safari", help="Open web UI in Safari"),
 ):
     """Start mitmios proxy and web dashboard."""
     from mitmios.proxy import show_simulator_info
@@ -59,6 +60,18 @@ def start(
     ]
     if no_browser:
         args.extend(["--set", "web_open_browser=false"])
+
+    if safari:
+        import webbrowser
+        from mitmproxy.tools.web import webaddons
+
+        def _open_safari(url: str) -> bool:
+            try:
+                return webbrowser.get("safari").open(url)
+            except webbrowser.Error:
+                return webaddons.open_browser(url)
+
+        webaddons.open_browser = _open_safari
 
     try:
         from mitmproxy.tools.main import mitmweb

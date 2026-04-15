@@ -2,6 +2,13 @@
 
 # mitmios Development Server
 
+BROWSER_APP=""
+for arg in "$@"; do
+    case "$arg" in
+        --safari) BROWSER_APP="Safari" ;;
+    esac
+done
+
 echo "mitmios - iOS Network Debugging Tool (dev mode)"
 echo ""
 
@@ -33,7 +40,7 @@ echo "Vite dev server: http://localhost:5173"
 # 2. mitmweb backend
 echo "Starting mitmweb backend..."
 cd "$MITMPROXY_DIR"
-uv run mitmweb --web-host 127.0.0.1 --web-port 8081 > /tmp/mitmios-backend.log 2>&1 &
+PYTHONUNBUFFERED=1 uv run mitmweb --web-host 127.0.0.1 --web-port 8081 --set web_open_browser=false --mode wireguard > /tmp/mitmios-backend.log 2>&1 &
 MITMWEB_PID=$!
 
 sleep 3
@@ -51,7 +58,11 @@ echo "Press Ctrl+C to stop all servers"
 echo ""
 
 # Auto-open browser
-open "http://127.0.0.1:8081/?token=$TOKEN"
+if [ -n "$BROWSER_APP" ]; then
+    open -a "$BROWSER_APP" "http://127.0.0.1:8081/?token=$TOKEN"
+else
+    open "http://127.0.0.1:8081/?token=$TOKEN"
+fi
 
 # Monitor logs
 echo "Monitoring logs..."
